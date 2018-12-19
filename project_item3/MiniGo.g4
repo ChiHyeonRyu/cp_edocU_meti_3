@@ -40,8 +40,7 @@ expr        : IDENT '(' args ')'
             | '(' expr ')' 
             | IDENT '[' expr ']' 
             | FMT '.' IDENT '(' args ')' 
-            | op=('-'|'+'|'--'|'++'|'!') expr
-            | expr op=('--'|'++')
+            | op=('-'|'+'|'--'|'++'|'!') expr 
             | left=expr op=('*'|'/'|'%') right=expr 
             | left=expr op=('+'|'-') right=expr 
             | left=expr op=(EQ|NE|LE|'<'|GE|'>'|AND|OR) right=expr
