@@ -87,7 +87,7 @@ public class UCodeGenListener extends MiniGoBaseListener {
 	public void exitProgram(MiniGoParser.ProgramContext ctx) {
 		String decl = null;
 		try {
-			FileWriter fw = new FileWriter("[01][201203405][·ùÄ¡Çö][03][1].uco");
+			FileWriter fw = new FileWriter("ucode.uco");
 			
 			for (int i = 0; i < ctx.getChildCount(); i++) {
 				decl = newTexts.get(ctx.decl(i));

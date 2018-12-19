@@ -1,0 +1,16 @@
+/Hello.tokens
+/HelloBaseListener.java
+/HelloLexer.java
+/HelloLexer.tokens
+/HelloListener.java
+/HelloParser.java
+/Hello.interp
+/HelloLexer.interp
+/MiniGo.interp
+/MiniGo.tokens
+/MiniGoBaseListener.java
+/MiniGoLexer.interp
+/MiniGoLexer.java
+/MiniGoLexer.tokens
+/MiniGoListener.java
+/MiniGoParser.java
