@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 func main() {
 	var i int
 	var j int

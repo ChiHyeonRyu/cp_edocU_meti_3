@@ -82,5 +82,4 @@ WS       : (' '
          | '\r'
          | '\n'        
          )+
-   -> channel(HIDDEN)  
-    ;
+   -> channel(HIDDEN);
