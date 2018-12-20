@@ -15,11 +15,11 @@ func main() {
 			if (rem == 0) {
 				sum = sum + j
 			}
-			++j
+			j++
 		}
 		if (i == sum) {
 			write(i)
 		}
-		++i
+		i++
 	}
 }

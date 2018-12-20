@@ -69,10 +69,16 @@ public class UCodeGenListener extends MiniGoBaseListener {
 				|| ctx.getChild(0).getText().equals("+") || ctx.getChild(0).getText().equals("--")
 				|| ctx.getChild(0).getText().equals("++") || ctx.getChild(0).getText().equals("!"));
 	}
+	
+	boolean isPostIncDec(MiniGoParser.ExprContext ctx) {
+		return ctx.getChildCount() == 2 && (ctx.getChild(1).getText().equals("++")
+				|| ctx.getChild(0).getText().equals("--"));
+	}
 
 	boolean isBinaryOperation(MiniGoParser.ExprContext ctx) {
 		return ctx.getChildCount() == 3 && ctx.getChild(1) != ctx.expr() && ctx.getChild(0) != ctx.LITERAL(0);
 	}
+	
 
 	boolean isAssignmentOperation(MiniGoParser.ExprContext ctx) {
 		return ctx.getChildCount() == 3 && ctx.getChild(0).equals(ctx.IDENT());
@@ -577,6 +583,18 @@ public class UCodeGenListener extends MiniGoBaseListener {
 				s1 += space11 + "notop\n";
 			
 			newTexts.put(ctx, s1);
+		} else if (isPostIncDec(ctx)) {  // *** Update: expr op=('--'|'++') 
+			op = ctx.getChild(1).getText();
+			s1 = newTexts.get(ctx.expr(0)) + "\n";
+			
+			if (op.equals("--")) 
+				s1 += space11 + "dec\n" + space11 + "str " + localVar.get(ctx.expr(0).getText()).base + " "  + localVar.get(ctx.expr(0).getText()).offset;
+			else if (op.equals("++")) 
+				s1 += space11 + "inc\n" + space11 + "str " + localVar.get(ctx.expr(0).getText()).base + " "  + localVar.get(ctx.expr(0).getText()).offset;
+			
+			newTexts.put(ctx, s1);
+			
+			
 		} else if (isBinaryOperation(ctx)) { // expr (7,8,9): expr op expr
 			s1 = newTexts.get(ctx.expr(0));
 			s2 = newTexts.get(ctx.expr(1));
