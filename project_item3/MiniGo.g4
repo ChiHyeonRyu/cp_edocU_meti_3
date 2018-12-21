@@ -42,7 +42,7 @@ expr        : IDENT '(' args ')'
             | FMT '.' IDENT '(' args ')' 
             | op=('-'|'+'|'--'|'++'|'!') expr
             | expr op=('--'|'++')
-            | expr op=('+'|'-'|'*'|'/') '=' expr
+            | IDENT op=('+'|'-'|'*'|'/') '=' expr
             | left=expr op=('*'|'/'|'%') right=expr 
             | left=expr op=('+'|'-') right=expr 
             | left=expr op=(EQ|NE|LE|'<'|GE|'>'|AND|OR) right=expr

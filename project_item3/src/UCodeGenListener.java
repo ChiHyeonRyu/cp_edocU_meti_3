@@ -57,7 +57,7 @@ public class UCodeGenListener extends MiniGoBaseListener {
 	}
 
 	boolean isArray(MiniGoParser.ExprContext ctx) {
-		return ctx.getChildCount() == 4 && ctx.getChild(0).equals(ctx.IDENT()) && ctx.getChild(2) != ctx.args();
+		return ctx.getChildCount() == 4 && ctx.getChild(0).equals(ctx.IDENT()) && ctx.getChild(2) == ctx.expr();
 	}
 
 	boolean isFunctionCall(MiniGoParser.ExprContext ctx) {
@@ -599,11 +599,12 @@ public class UCodeGenListener extends MiniGoBaseListener {
 				s1 += space11 + "inc\n" + space11 + "str " + localVar.get(ctx.expr(0).getText()).base + " "  + localVar.get(ctx.expr(0).getText()).offset;
 			
 			newTexts.put(ctx, s1);
-		} else if (isAbbreviatedOperation(ctx)) { // *** Update: expr op=('+'|'-'|'*'|'/') '=' expr
-			s1 = newTexts.get(ctx.expr(0));
-			s2 = newTexts.get(ctx.expr(1));
-			op = ctx.getChild(0).getText();
+		} else if (isAbbreviatedOperation(ctx)) { // *** Update: IDENT op=('+'|'-'|'*'|'/') '=' expr
+			s1 = ctx.IDENT().getText();
+			s2 = newTexts.get(ctx.expr(0));
+			op = ctx.op.getText();
 			String AbbreCode = null;
+			String lvalue = "";
 			
 			if (op.equals("+")) 
 				AbbreCode = space11 + "add";
@@ -614,7 +615,22 @@ public class UCodeGenListener extends MiniGoBaseListener {
 			else if (op.equals("/")) 
 				AbbreCode = space11 + "div";
 			
-			newTexts.put(ctx, s1 + "\n" + s2 + "\n" + AbbreCode);
+			if (localVar.containsKey(s1)) {
+				if (localVar.get(s1).isArray == false)
+					lvalue += space11 + "lod " + localVar.get(s1).base + " " + localVar.get(s1).offset;
+				else if (localVar.get(s1).isArray == true)
+					lvalue += space11 + "lda " + localVar.get(s1).base + " " + localVar.get(s1).offset;
+			} else if (globalVar.containsKey(s1)) {
+				if (globalVar.get(s1).isArray == false)
+					lvalue += space11 + "lod " + globalVar.get(s1).base + " " + globalVar.get(s1).offset;
+				else if (globalVar.get(s1).isArray == true)
+					lvalue += space11 + "lda " + globalVar.get(s1).base + " " + globalVar.get(s1).offset;
+			}
+			
+			if (localVar.containsKey(s1))
+				newTexts.put(ctx, lvalue + "\n" + s2 + "\n" + AbbreCode + "\n" + space11 + "str " + localVar.get(s1).base + " " + localVar.get(s1).offset);
+			else if (globalVar.containsKey(s1))
+				newTexts.put(ctx, lvalue + "\n" + s2 + "\n" + AbbreCode + "\n" + space11 + "str " + globalVar.get(s1).base + " " + globalVar.get(s1).offset);
 			
 		} else if (isBinaryOperation(ctx)) { // expr (7,8,9): expr op expr
 			s1 = newTexts.get(ctx.expr(0));
