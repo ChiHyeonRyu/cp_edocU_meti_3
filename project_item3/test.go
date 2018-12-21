@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 func main() {
 	var i int
 	var j int
@@ -14,7 +13,7 @@ func main() {
 		for j <= k {
 			rem = i % j
 			if (rem == 0) {
-				sum = sum + j
+				sum += j
 			}
 			j++
 		}

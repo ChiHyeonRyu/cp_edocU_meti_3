@@ -61,7 +61,7 @@ public class UCodeGenListener extends MiniGoBaseListener {
 	}
 
 	boolean isFunctionCall(MiniGoParser.ExprContext ctx) {
-		return ctx.getChildCount() == 4 && ctx.getChild(1) != ctx.expr();
+		return ctx.getChildCount() == 4 && ctx.getChild(1) != ctx.expr() && ctx.getChild(2) == ctx.args();
 	}
 
 	boolean isUnaryOperation(MiniGoParser.ExprContext ctx) {
@@ -74,7 +74,13 @@ public class UCodeGenListener extends MiniGoBaseListener {
 		return ctx.getChildCount() == 2 && (ctx.getChild(1).getText().equals("++")
 				|| ctx.getChild(0).getText().equals("--"));
 	}
-
+	
+	boolean isAbbreviatedOperation(MiniGoParser.ExprContext ctx) {
+		return ctx.getChildCount() == 4 && (ctx.getChild(1).getText().equals("-")
+				|| ctx.getChild(1).getText().equals("+") || ctx.getChild(1).getText().equals("*")
+				|| ctx.getChild(1).getText().equals("/"));
+	}
+	
 	boolean isBinaryOperation(MiniGoParser.ExprContext ctx) {
 		return ctx.getChildCount() == 3 && ctx.getChild(1) != ctx.expr() && ctx.getChild(0) != ctx.LITERAL(0);
 	}
@@ -593,7 +599,22 @@ public class UCodeGenListener extends MiniGoBaseListener {
 				s1 += space11 + "inc\n" + space11 + "str " + localVar.get(ctx.expr(0).getText()).base + " "  + localVar.get(ctx.expr(0).getText()).offset;
 			
 			newTexts.put(ctx, s1);
+		} else if (isAbbreviatedOperation(ctx)) { // *** Update: expr op=('+'|'-'|'*'|'/') '=' expr
+			s1 = newTexts.get(ctx.expr(0));
+			s2 = newTexts.get(ctx.expr(1));
+			op = ctx.getChild(0).getText();
+			String AbbreCode = null;
 			
+			if (op.equals("+")) 
+				AbbreCode = space11 + "add";
+			else if (op.equals("-")) 
+				AbbreCode = space11 + "sub";
+			else if (op.equals("*")) 
+				AbbreCode = space11 + "mult";
+			else if (op.equals("/")) 
+				AbbreCode = space11 + "div";
+			
+			newTexts.put(ctx, s1 + "\n" + s2 + "\n" + AbbreCode);
 			
 		} else if (isBinaryOperation(ctx)) { // expr (7,8,9): expr op expr
 			s1 = newTexts.get(ctx.expr(0));
