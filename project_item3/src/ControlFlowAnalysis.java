@@ -10,6 +10,7 @@ public class ControlFlowAnalysis {
 	private int totalLineNum;
 	private HashMap<Integer, String> Leaders = new HashMap<>();
 	private HashMap<Integer, ArrayList<String>> BasicBlocks = new HashMap<>();
+	private HashMap<Integer, ArrayList<Integer>> CFG = new HashMap<>();
 	private int[] leaderCheck;
 
 	public void findLeader(String fileName) {
@@ -63,7 +64,6 @@ public class ControlFlowAnalysis {
 		}
 	}
 		
-
 	public void makeBasicBlock(String fileName) {
 		ArrayList<String> ucodes;
 		
@@ -74,7 +74,7 @@ public class ControlFlowAnalysis {
 			int leaderSize = Leaders.size();
 			for (int i = 0; i < leaderSize; i++) {
 				ucodes = new ArrayList<>();
-				int lc = lineCount;
+//				int lc = lineCount;
 				while ((lineCount == totalLineNum) ||lineCount < leaderCheck[i + 1]) {
 					line = br.readLine();
 					if (!Leaders.containsKey(lineCount)) {
@@ -83,9 +83,10 @@ public class ControlFlowAnalysis {
 					ucodes.add(line);
 					lineCount++;
 				}
-				BasicBlocks.put(lc, ucodes);
+				BasicBlocks.put(i + 1, ucodes);
 			}
 			
+			HashMap<Integer, ArrayList<String>> temp = BasicBlocks;
 			System.out.println("\n---------------- Basic Block ----------------");
 			for (int i = 0; i < BasicBlocks.size(); i++) {
 					int lnfirst = leaderCheck[i];
@@ -96,7 +97,7 @@ public class ControlFlowAnalysis {
 							lnlast = leaderCheck[i + 1];
 						}
 					} 
-					System.out.printf("%3d   ~ %3d: %s\n", lnfirst, lnlast, BasicBlocks.get(lnfirst));
+					System.out.printf("BB%d :: %3d ~ %3d: %s\n", i + 1, lnfirst, lnlast, BasicBlocks.get(i + 1));
 			}
 			
 			lineCount = 1;
@@ -107,6 +108,81 @@ public class ControlFlowAnalysis {
 		} catch (IOException e) {
 			System.out.println("::: I/O error");
 			System.exit(1);
+		}
+	}
+	
+	public void makeCFG() {
+		ArrayList<Integer> entryToBB1 = new ArrayList<>();
+		entryToBB1.add(1);
+		CFG.put(0, entryToBB1);
+		for (int i = 1; i <= BasicBlocks.size(); i++) {
+			ArrayList<Integer> targetBBList = new ArrayList<>();
+			ArrayList<String> BB = BasicBlocks.get(i);
+			String lastCode = BB.get(BB.size() - 1);
+			String label = lastCode;
+			int targetBB;
+			if (lastCode.charAt(0) == 'f' && lastCode.charAt(1) == 'j') {
+				if (i != BasicBlocks.size()) {
+					targetBBList.add(i + 1);
+				} else {
+					targetBBList.add(-1);
+				}
+				label = label.substring(4, label.length());
+				targetBB = findTargetBB(label);
+				targetBBList.add(targetBB);
+				
+			} else if (lastCode.charAt(0) == 'u' && lastCode.charAt(1) == 'j') {
+				label = label.substring(4, label.length());
+				targetBB = findTargetBB(label);
+				targetBBList.add(targetBB);
+			} else {
+				if (i != BasicBlocks.size()) {
+					targetBBList.add(i + 1);
+				} else {
+					targetBBList.add(-1);
+				}
+			}
+			CFG.put(i, targetBBList);
+		}
+	}
+	
+	public int findTargetBB(String label) {
+		String targetLB = null;
+		for (int i = 1; i <= BasicBlocks.size(); i++) {
+			targetLB = BasicBlocks.get(i).get(0);
+			int lbLen = 0;
+			int j = 0;
+			while (targetLB.charAt(j) != ' ') {
+				lbLen++;
+				j++;
+			}
+			targetLB = targetLB.substring(0, lbLen);
+			if (targetLB.equals(label)) {
+				return i;
+			}
+		}
+		return 0;
+	}
+	
+	public void drawCFG() {
+		makeCFG();
+		System.out.println("\n---------------- Control Flow Graph ----------------");
+		System.out.printf("Entry -> BB1\n");
+		for (int i = 1; i <= CFG.size(); i++) {
+			if (CFG.get(i).contains(-1) && CFG.get(i).size() == 1) {
+				System.out.printf("BB%d -> Exit", i);
+				return;
+			} 
+			for (int j = 0; j < CFG.get(i).size(); j++) {
+				if (j == (CFG.get(i).size() - 1)) {
+					System.out.printf("BB%d -> BB%d", i, CFG.get(i).get(j));
+				} else if (CFG.get(i).get(j) == -1 ) 
+					System.out.printf("BB%d -> Exit", i);
+				else {
+					System.out.printf("BB%d -> BB%d , ", i, CFG.get(i).get(j));
+				} 
+			}
+			System.out.println();
 		}
 	}
 }

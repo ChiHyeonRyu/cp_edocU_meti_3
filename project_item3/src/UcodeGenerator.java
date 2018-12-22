@@ -21,6 +21,6 @@ public class UcodeGenerator {
 		ControlFlowAnalysis cfa = new ControlFlowAnalysis();
 		cfa.findLeader(FILE_UCODE);
 		cfa.makeBasicBlock(FILE_UCODE);
-		
+		cfa.drawCFG();
 	}
 }
