@@ -1,3 +1,6 @@
+var a, b, c int
+var d, e, f, g int
+
 func main() {
 	var i, j, k int
 	var rem, sum int

@@ -5,7 +5,8 @@ decl        : var_decl
             | fun_decl ;
 var_decl    : VAR IDENT type_spec
             | VAR IDENT ',' IDENT type_spec
-            | VAR IDENT '[' LITERAL ']' type_spec ;
+            | VAR IDENT '[' LITERAL ']' type_spec 
+            | VAR expr (',' expr)* type_spec ; 
 type_spec   : INT 
             | VOID 
             | ; 

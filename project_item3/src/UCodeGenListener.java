@@ -159,7 +159,7 @@ public class UCodeGenListener extends MiniGoBaseListener {
 				globalVar.put(ctx.IDENT(0).getText(), new Var(base, globalOffset, false));
 				globalOffset++;
 			}
-			newTexts.put(ctx, temp);
+			newTexts.put(ctx, temp);s
 		}
 		// var_decl (3): VAR IDENT '[' LITERAL ']' type_spec
 		if (ctx.getChildCount() == 6) {
@@ -167,6 +167,19 @@ public class UCodeGenListener extends MiniGoBaseListener {
 			newTexts.put(ctx, space11 + "sym " + base + " " + globalOffset + " " + LITERAL);
 			globalVar.put(ctx.IDENT(0).getText(), new Var(base, globalOffset, true));
 			globalOffset += Integer.parseInt(LITERAL);
+		}
+		// var_decl (4): VAR expr (',' expr)* type_spec;
+		else { 
+			String globalSyms = "";
+			for (int i = 0; i < ctx.expr().size(); i++) {
+				globalSyms += space11 + "sym " + base + " " + globalOffset + " " + 1 + "\n";
+				globalVar.put(ctx.expr(i).getText(), new Var(base, globalOffset, false));
+				globalOffset++;
+			}
+			if(!globalSyms.equals("")) {
+				globalSyms = globalSyms.substring(0, globalSyms.length() - 1);
+			} 
+			newTexts.put(ctx, globalSyms);
 		}
 	}
 
