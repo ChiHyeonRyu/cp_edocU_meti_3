@@ -1,6 +1,5 @@
 import java.io.FileWriter;
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.HashMap;
 import org.antlr.v4.runtime.tree.*;
 
@@ -616,7 +615,7 @@ public class UCodeGenListener extends MiniGoBaseListener {
 				s1 += space11 + "notop\n";
 			
 			newTexts.put(ctx, s1);
-		} else if (isPostIncDec(ctx)) {  // *** Update: expr op=('--'|'++') 
+		} else if (isPostIncDec(ctx)) {  // *** Update expr (7): expr op=('--'|'++') 
 			op = ctx.getChild(1).getText();
 			s1 = newTexts.get(ctx.expr(0)) + "\n";
 			
@@ -626,7 +625,7 @@ public class UCodeGenListener extends MiniGoBaseListener {
 				s1 += space11 + "inc\n" + space11 + "str " + localVar.get(ctx.expr(0).getText()).base + " "  + localVar.get(ctx.expr(0).getText()).offset;
 			
 			newTexts.put(ctx, s1);
-		} else if (isAbbreviatedOperation(ctx)) { // *** Update: IDENT op=('+'|'-'|'*'|'/') '=' expr
+		} else if (isAbbreviatedOperation(ctx)) { // *** Update expr (8): IDENT op=('+'|'-'|'*'|'/') '=' expr
 			s1 = ctx.IDENT().getText();
 			s2 = newTexts.get(ctx.expr(0));
 			op = ctx.op.getText();
@@ -659,7 +658,7 @@ public class UCodeGenListener extends MiniGoBaseListener {
 			else if (globalVar.containsKey(s1))
 				newTexts.put(ctx, lvalue + "\n" + s2 + "\n" + AbbreCode + "\n" + space11 + "str " + globalVar.get(s1).base + " " + globalVar.get(s1).offset);
 			
-		} else if (isBinaryOperation(ctx)) { // expr (7,8,9): expr op expr
+		} else if (isBinaryOperation(ctx)) { // expr (9,10,11): expr op expr
 			s1 = newTexts.get(ctx.expr(0));
 			s2 = newTexts.get(ctx.expr(1));
 			op = ctx.getChild(1).getText();
@@ -693,7 +692,7 @@ public class UCodeGenListener extends MiniGoBaseListener {
 				biUcode = space11 + "or";
 			newTexts.put(ctx, s1 + "\n" + s2 + "\n" + biUcode);
 		}
-		if (isAssignmentOperation(ctx)) { // expr (11): IDENT '=' expr
+		if (isAssignmentOperation(ctx)) { // expr (12): IDENT '=' expr
 			s1 = ctx.IDENT().getText();
 			s2 = newTexts.get(ctx.expr(0));
 			if (localVar.containsKey(s1))
@@ -701,7 +700,7 @@ public class UCodeGenListener extends MiniGoBaseListener {
 			else if (globalVar.containsKey(s1))
 				newTexts.put(ctx, s2 + "\n" + space11 + "str " + globalVar.get(s1).base + " " + globalVar.get(s1).offset);
 		}
-		if (isArrayAssignmentOperation(ctx)) { // expr (12): IDENT '[' expr ']' '=' expr;
+		if (isArrayAssignmentOperation(ctx)) { // expr (13): IDENT '[' expr ']' '=' expr;
 			s1 = ctx.IDENT().getText();
 			expr0 = newTexts.get(ctx.expr(0));
 			expr1 = newTexts.get(ctx.expr(1));
@@ -723,8 +722,8 @@ public class UCodeGenListener extends MiniGoBaseListener {
 	/* args */
 	@Override
 	public void exitArgs(MiniGoParser.ArgsContext ctx) {
-		String args = ""; // args (2)
-		for (int i = 0; i < ctx.expr().size(); i++) { // args (1)
+		String args = ""; // args (2): 
+		for (int i = 0; i < ctx.expr().size(); i++) { // args (1): expr (',' expr)*
 				args += newTexts.get(ctx.expr(i)) + "\n";
 		}
 		if(!args.equals("")) {
