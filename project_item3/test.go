@@ -1,25 +1,11 @@
-var a, b, c int
-var d, e, f, g int
-
 func main() {
-	var i, j, k int
-	var rem, sum int
+	var i int
+	i = 0
 	
-	i = 2
-	for i <= 500 {
-		sum = 0
-		k = i / 2
-		j = 1
-		for j <= k {
-			rem = i % j
-			if (rem == 0) {
-				sum += j
-			}
-			j++
-		}
-		if (i == sum) {
-			write(i)
-		}
+	for i < 5 {
+		write(i)
 		i++
 	}
+	
+	write(i*i)
 }

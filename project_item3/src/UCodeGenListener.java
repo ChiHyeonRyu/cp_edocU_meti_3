@@ -159,7 +159,7 @@ public class UCodeGenListener extends MiniGoBaseListener {
 				globalVar.put(ctx.IDENT(0).getText(), new Var(base, globalOffset, false));
 				globalOffset++;
 			}
-			newTexts.put(ctx, temp);s
+			newTexts.put(ctx, temp);
 		}
 		// var_decl (3): VAR IDENT '[' LITERAL ']' type_spec
 		if (ctx.getChildCount() == 6) {

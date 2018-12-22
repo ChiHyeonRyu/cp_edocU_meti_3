@@ -13,5 +13,10 @@ public class UcodeGenerator {
 		
 		ParseTreeWalker walker = new ParseTreeWalker();
 		walker.walk(new UCodeGenListener(), tree);
+		
+		System.out.println("\n\n============================================\n");
+		ControlFlowAnalysis cfa = new ControlFlowAnalysis();
+		cfa.findLeader("ucode.uco");
+		
 	}
 }
