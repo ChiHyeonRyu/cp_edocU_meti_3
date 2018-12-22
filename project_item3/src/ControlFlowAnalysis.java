@@ -11,8 +11,9 @@ public class ControlFlowAnalysis {
 	private HashMap<Integer, String> Leaders = new HashMap<>();
 	private HashMap<Integer, ArrayList<String>> BasicBlocks = new HashMap<>();
 	private HashMap<Integer, ArrayList<Integer>> CFG = new HashMap<>();
-	private int[] leaderCheck;
+	private int[] leaderLineNum;
 
+	// 1. Find Leaders in the U-code program
 	public void findLeader(String fileName) {
 		try {
 			BufferedReader br = new BufferedReader(new FileReader(fileName));
@@ -20,7 +21,6 @@ public class ControlFlowAnalysis {
 
 			// Find Reader (1): First instruction of program
 			line = br.readLine();
-			// line = line.substring(11, line.length());
 			Leaders.put(lineCount, line);
 			lineCount++;
 
@@ -38,22 +38,23 @@ public class ControlFlowAnalysis {
 				}
 				lineCount++;
 			}
-			
+
 			totalLineNum = lineCount - 1;
 			lineCount = 1;
 
+			// Print Leaders
 			System.out.println("------------------ Leader ------------------");
-			leaderCheck = new int[Leaders.size() + 1];
+			leaderLineNum = new int[Leaders.size() + 1];
 			int leaderNumber = 0;
 			for (int i = 1; i <= totalLineNum; i++) {
 				if (Leaders.containsKey(i)) {
 					System.out.printf("%3d: %s\n", i, Leaders.get(i));
-					leaderCheck[leaderNumber] = i;
+					leaderLineNum[leaderNumber] = i;
 					leaderNumber++;
 				}
 			}
-			leaderCheck[leaderCheck.length - 1] = totalLineNum;
-			
+			leaderLineNum[leaderLineNum.length - 1] = totalLineNum;
+
 			br.close();
 		} catch (FileNotFoundException e) {
 			System.out.println("::: I/O error");
@@ -63,43 +64,45 @@ public class ControlFlowAnalysis {
 			System.exit(1);
 		}
 	}
-		
+
+	// 2. Make Basic Blocks using leaders
 	public void makeBasicBlock(String fileName) {
 		ArrayList<String> ucodes;
-		
+
 		try {
 			BufferedReader br = new BufferedReader(new FileReader(fileName));
 			String line;
-			
+
 			int leaderSize = Leaders.size();
 			for (int i = 0; i < leaderSize; i++) {
 				ucodes = new ArrayList<>();
-//				int lc = lineCount;
-				while ((lineCount == totalLineNum) ||lineCount < leaderCheck[i + 1]) {
+				while ((lineCount == totalLineNum) || lineCount < leaderLineNum[i + 1]) {
 					line = br.readLine();
 					if (!Leaders.containsKey(lineCount)) {
-						line = line.substring(11, line.length());
+						if (line.charAt(0) == ' ') {
+							line = line.substring(11, line.length());
+						}
 					}
 					ucodes.add(line);
 					lineCount++;
 				}
 				BasicBlocks.put(i + 1, ucodes);
 			}
-			
-			HashMap<Integer, ArrayList<String>> temp = BasicBlocks;
+
+			// Print Basic Blocks
 			System.out.println("\n---------------- Basic Block ----------------");
 			for (int i = 0; i < BasicBlocks.size(); i++) {
-					int lnfirst = leaderCheck[i];
-					int lnlast = 0;
-					if (i != BasicBlocks.size()) {
-						lnlast = leaderCheck[i + 1] - 1;
-						if (i == BasicBlocks.size() - 1) {
-							lnlast = leaderCheck[i + 1];
-						}
-					} 
-					System.out.printf("BB%d :: %3d ~ %3d: %s\n", i + 1, lnfirst, lnlast, BasicBlocks.get(i + 1));
+				int lnfirst = leaderLineNum[i];
+				int lnlast = 0;
+				if (i != BasicBlocks.size()) {
+					lnlast = leaderLineNum[i + 1] - 1;
+					if (i == BasicBlocks.size() - 1) {
+						lnlast = leaderLineNum[i + 1];
+					}
+				}
+				System.out.printf("BB%d :: %3d ~ %3d: %s\n", i + 1, lnfirst, lnlast, BasicBlocks.get(i + 1));
 			}
-			
+
 			lineCount = 1;
 			br.close();
 		} catch (FileNotFoundException e) {
@@ -110,7 +113,8 @@ public class ControlFlowAnalysis {
 			System.exit(1);
 		}
 	}
-	
+
+	// 3. Make CFG using Basic Blocks
 	public void makeCFG() {
 		ArrayList<Integer> entryToBB1 = new ArrayList<>();
 		entryToBB1.add(1);
@@ -121,6 +125,8 @@ public class ControlFlowAnalysis {
 			String lastCode = BB.get(BB.size() - 1);
 			String label = lastCode;
 			int targetBB;
+
+			// Branch (1): fjp
 			if (lastCode.charAt(0) == 'f' && lastCode.charAt(1) == 'j') {
 				if (i != BasicBlocks.size()) {
 					targetBBList.add(i + 1);
@@ -130,12 +136,16 @@ public class ControlFlowAnalysis {
 				label = label.substring(4, label.length());
 				targetBB = findTargetBB(label);
 				targetBBList.add(targetBB);
-				
-			} else if (lastCode.charAt(0) == 'u' && lastCode.charAt(1) == 'j') {
+
+			}
+			// Branch (2): ujp
+			else if (lastCode.charAt(0) == 'u' && lastCode.charAt(1) == 'j') {
 				label = label.substring(4, label.length());
 				targetBB = findTargetBB(label);
 				targetBBList.add(targetBB);
-			} else {
+			}
+			// Normal Code & 'Exit'
+			else {
 				if (i != BasicBlocks.size()) {
 					targetBBList.add(i + 1);
 				} else {
@@ -145,7 +155,8 @@ public class ControlFlowAnalysis {
 			CFG.put(i, targetBBList);
 		}
 	}
-	
+
+	// Method: find label of branch target
 	public int findTargetBB(String label) {
 		String targetLB = null;
 		for (int i = 1; i <= BasicBlocks.size(); i++) {
@@ -163,24 +174,25 @@ public class ControlFlowAnalysis {
 		}
 		return 0;
 	}
-	
+
+	// 4. Print CFG
 	public void drawCFG() {
 		makeCFG();
 		System.out.println("\n---------------- Control Flow Graph ----------------");
 		System.out.printf("Entry -> BB1\n");
 		for (int i = 1; i <= CFG.size(); i++) {
 			if (CFG.get(i).contains(-1) && CFG.get(i).size() == 1) {
-				System.out.printf("BB%d -> Exit", i);
+				System.out.printf("BB%d -> Exit", i); // Last node has only 'Exit'
 				return;
-			} 
+			}
 			for (int j = 0; j < CFG.get(i).size(); j++) {
 				if (j == (CFG.get(i).size() - 1)) {
 					System.out.printf("BB%d -> BB%d", i, CFG.get(i).get(j));
-				} else if (CFG.get(i).get(j) == -1 ) 
+				} else if (CFG.get(i).get(j) == -1) // Last node has 'Exit' and other nodes
 					System.out.printf("BB%d -> Exit", i);
 				else {
 					System.out.printf("BB%d -> BB%d , ", i, CFG.get(i).get(j));
-				} 
+				}
 			}
 			System.out.println();
 		}
