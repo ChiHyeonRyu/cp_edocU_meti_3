@@ -1,9 +1,6 @@
 func main() {
-	var i int
-	var j int
-	var k int
-	var rem int
-	var sum int
+	var i, j, k int
+	var rem, sum int
 	
 	i = 2
 	for i <= 500 {

@@ -1,5 +1,6 @@
 import java.io.FileWriter;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.HashMap;
 import org.antlr.v4.runtime.tree.*;
 
@@ -520,13 +521,26 @@ public class UCodeGenListener extends MiniGoBaseListener {
 			newTexts.put(ctx, space11 + "sym " + base + " " + localOffset + " " + 1);
 			localVar.put(ctx.IDENT().getText(), new Var(base, localOffset, false));
 			localOffset++;
-		}
+		} else
 		// local_decl (2): VAR IDENT '[' LITERAL ']' type_spec
 		if (ctx.getChildCount() == 6) {
 			String LITERAL = ctx.LITERAL().getText();
 			newTexts.put(ctx, space11 + "sym " + base + " " + localOffset + " " + LITERAL);
 			localVar.put(ctx.IDENT().getText(), new Var(base, localOffset, true));
 			localOffset += Integer.parseInt(LITERAL);
+		} 
+		//local_decl (3): VAR expr (',' expr)* type_spec;
+		else { 
+			String localSyms = "";
+			for (int i = 0; i < ctx.expr().size(); i++) {
+				localSyms += space11 + "sym " + base + " " + localOffset + " " + 1 + "\n";
+				localVar.put(ctx.expr(i).getText(), new Var(base, localOffset, false));
+				localOffset++;
+			}
+			if(!localSyms.equals("")) {
+				localSyms = localSyms.substring(0, localSyms.length() - 1);
+			} 
+			newTexts.put(ctx, localSyms);
 		}
 	}
 

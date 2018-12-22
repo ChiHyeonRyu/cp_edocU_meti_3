@@ -34,7 +34,8 @@ return_stmt : RETURN expr ',' expr
             | RETURN expr
             | RETURN ;
 local_decl  : VAR IDENT type_spec
-            | VAR IDENT '[' LITERAL ']' type_spec;
+            | VAR IDENT '[' LITERAL ']' type_spec
+            | VAR expr (',' expr)* type_spec;
 expr        : IDENT '(' args ')'
             | (LITERAL|IDENT)
             | '(' expr ')' 
