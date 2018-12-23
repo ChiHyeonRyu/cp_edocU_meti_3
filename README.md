@@ -5,5 +5,5 @@ Upgrade MiniGo.g4
 
 Control Flow Analysis & Control Flow Graph
 
-# Result
+# Result(e.g)
 ![result_eg](https://user-images.githubusercontent.com/26526234/50379632-10e5d380-0692-11e9-9cbb-15aad4b063a0.PNG)
